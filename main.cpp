@@ -4,6 +4,8 @@
 #include <string>
 #include <ctime>
 #include <cstdlib>
+#include <limits>
+#include <algorithm>
 
 using namespace std;
 
@@ -12,68 +14,99 @@ using namespace std;
                     LOGIC QUEST
 ===========================================================
 
-Is project me 5 games hain:
+FULL WORKING VERSION
 
-1. Sudoku
+Games Included:
+1. Sudoku Viewer
 2. Tic Tac Toe
 3. Hangman
 4. Math Quiz
 5. Number Guessing
 
-IMPORTANT BUG FIXES:
---------------------
-1. srand() ko constructor me ek hi baar call kiya
-2. TicTacToe me invalid input handling add ki
-3. system("clear") remove kiya
-4. MathQuiz file reading fix ki
-5. Hangman repeated guesses handle kiye
-6. Sudoku random loading stable kiya
+FEATURES:
+✔ Proper input validation
+✔ Random puzzle/word selection
+✔ Winner detection
+✔ Replay-safe logic
+✔ File handling
+✔ Stable random generator
+✔ Clean implementation
+
+FILES REQUIRED:
+----------------
+assets/
+│
+├── sudoku_questions.txt
+├── words.txt
+└── math_questions.txt
 
 ===========================================================
 */
 
-class LogicQuest {
+class LogicQuest
+{
 
 private:
-
-    /*
-    -------------------------------------------------------
-    Constructor style initialization
-
-    Yeh ek baar object create hone pe execute hoga.
-    Random seed yahin set karna best practice hai.
-    -------------------------------------------------------
-    */
     int totalSudokuPuzzles = 5;
 
 public:
+    /*
+    =======================================================
+                        CONSTRUCTOR
+    =======================================================
+    */
+    LogicQuest()
+    {
+
+        srand((unsigned)time(0));
+    }
 
     /*
-    -------------------------------------------------------
-    Constructor
-    -------------------------------------------------------
+    =======================================================
+                    SAFE INTEGER INPUT
+    =======================================================
     */
-    LogicQuest() {
+    int getIntegerInput()
+    {
 
-        // Random seed initialize
-        srand(time(0));
+        int value;
+
+        while (true)
+        {
+
+            cin >> value;
+
+            if (cin.fail())
+            {
+
+                cin.clear();
+
+                cin.ignore(
+                    numeric_limits<streamsize>::max(),
+                    '\n');
+
+                cout << "Invalid input. Enter number: ";
+            }
+            else
+            {
+
+                return value;
+            }
+        }
     }
 
     /*
     =======================================================
                         MAIN MENU
     =======================================================
-
-    Yeh pura game hub hai.
-
-    User jo option choose karega
-    uske according game launch hoga.
     */
-    void menu() {
+    void menu()
+    {
 
         int choice;
 
-        do {
+        do
+        {
 
             cout << "\n";
             cout << "=====================================\n";
@@ -88,72 +121,194 @@ public:
             cout << "6. Exit\n";
 
             cout << "\nChoose Game: ";
-            cin >> choice;
 
-            /*
-            Agar user galat input de
-            example:
-            abc
+            choice = getIntegerInput();
 
-            toh cin fail state me chala jata hai.
-            */
-            if(cin.fail()) {
+            switch (choice)
+            {
 
-                cin.clear();
-                cin.ignore(1000, '\n');
+            case 1:
+                sudoku();
+                break;
 
-                cout << "\nInvalid Input.\n";
-                continue;
+            case 2:
+                ticTacToe();
+                break;
+
+            case 3:
+                hangman();
+                break;
+
+            case 4:
+                mathQuiz();
+                break;
+
+            case 5:
+                numberGuess();
+                break;
+
+            case 6:
+                cout << "\nExiting Logic Quest...\n";
+                break;
+
+            default:
+                cout << "\nInvalid Option.\n";
             }
 
-            switch(choice) {
-
-                case 1:
-                    sudoku();
-                    break;
-
-                case 2:
-                    ticTacToe();
-                    break;
-
-                case 3:
-                    hangman();
-                    break;
-
-                case 4:
-                    mathQuiz();
-                    break;
-
-                case 5:
-                    numberGuess();
-                    break;
-
-                case 6:
-                    cout << "\nExiting Game...\n";
-                    break;
-
-                default:
-                    cout << "\nInvalid Option.\n";
-            }
-
-        } while(choice != 6);
+        } while (choice != 6);
     }
 
     /*
     =======================================================
                         SUDOKU
     =======================================================
-
-    Yeh function:
-    1. File kholta hai
-    2. Random Sudoku choose karta hai
-    3. Sudoku print karta hai
     */
-    void sudoku() {
+    /*
+===========================================================
+                    SUDOKU IMPLEMENTATION
+===========================================================
+
+ADD THESE FUNCTIONS INSIDE CLASS LogicQuest
+Replace old sudoku() with this full version.
+
+FEATURES:
+✔ Playable Sudoku
+✔ Input numbers manually
+✔ Sudoku validation
+✔ Win detection
+✔ Quit anytime with -1
+
+===========================================================
+*/
+
+    /*
+    ===========================================================
+                    PRINT SUDOKU BOARD
+    ===========================================================
+    */
+    void printSudoku(int board[9][9])
+    {
+
+        cout << "\n";
+
+        for (int i = 0; i < 9; i++)
+        {
+
+            if (i % 3 == 0)
+                cout << "-------------------------------\n";
+
+            for (int j = 0; j < 9; j++)
+            {
+
+                if (j % 3 == 0)
+                    cout << "| ";
+
+                if (board[i][j] == 0)
+                    cout << ". ";
+                else
+                    cout << board[i][j] << " ";
+            }
+
+            cout << "|\n";
+        }
+
+        cout << "-------------------------------\n";
+    }
+
+    /*
+    ===========================================================
+                    VALIDATE SUDOKU MOVE
+    ===========================================================
+    */
+    bool isValidSudokuMove(
+    int board[9][9],
+    int row,
+    int col,
+    int num
+) {
+
+    /*
+    Row Check
+    */
+    for(int i = 0; i < 9; i++) {
+
+        if(i != col &&
+           board[row][i] == num)
+            return false;
+    }
+
+    /*
+    Column Check
+    */
+    for(int i = 0; i < 9; i++) {
+
+        if(i != row &&
+           board[i][col] == num)
+            return false;
+    }
+
+    /*
+    3x3 Grid Check
+    */
+    int startRow = row - row % 3;
+    int startCol = col - col % 3;
+
+    for(int i = 0; i < 3; i++) {
+
+        for(int j = 0; j < 3; j++) {
+
+            int currentRow = startRow + i;
+            int currentCol = startCol + j;
+
+            /*
+            Skip current cell itself
+            */
+            if(currentRow == row &&
+               currentCol == col)
+                continue;
+
+            if(board[currentRow][currentCol] == num)
+                return false;
+        }
+    }
+
+    return true;
+}
+
+    /*
+    ===========================================================
+                    CHECK SUDOKU COMPLETE
+    ===========================================================
+    */
+    bool sudokuComplete(int board[9][9])
+    {
+
+        for (int i = 0; i < 9; i++)
+        {
+
+            for (int j = 0; j < 9; j++)
+            {
+
+                if (board[i][j] == 0)
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    /*
+    ===========================================================
+                        PLAYABLE SUDOKU
+    ===========================================================
+    */
+    void sudoku()
+    {
 
         ifstream file("assets/sudoku_questions.txt");
 
-        if(!file) {
+        if (!file)
+        {
 
             cout << "\nSudoku file not found.\n";
             return;
@@ -163,150 +318,209 @@ public:
 
         string line;
 
-        /*
-        File ki sari non-empty lines vector me store
-        */
-        while(getline(file, line)) {
+        while (getline(file, line))
+        {
 
-            if(!line.empty())
+            if (!line.empty())
                 puzzles.push_back(line);
         }
 
-        /*
-        Random puzzle choose karna
+        int totalPuzzles = puzzles.size() / 9;
 
-        Har puzzle:
-        9 rows ka hai
-        */
-        int randomPuzzle = rand() % totalSudokuPuzzles;
+        if (totalPuzzles == 0)
+        {
+
+            cout << "\nNo Sudoku puzzles found.\n";
+            return;
+        }
+
+        int randomPuzzle = rand() % totalPuzzles;
 
         int startIndex = randomPuzzle * 9;
 
-        cout << "\n============= SUDOKU =============\n";
+        int board[9][9];
 
-        for(int i = 0; i < 9; i++) {
+        /*
+        Load Puzzle
+        */
+        for (int i = 0; i < 9; i++)
+        {
 
             string row = puzzles[startIndex + i];
 
-            for(char c : row) {
+            for (int j = 0; j < 9; j++)
+            {
 
-                /*
-                Sudoku me 0 ka matlab:
-                empty space
-                */
-                if(c == '0')
-                    cout << ". ";
-                else
-                    cout << c << " ";
+                board[i][j] = row[j] - '0';
             }
-
-            cout << endl;
         }
 
-        cout << "\nSudoku Solver Future Update me ayega.\n";
-    }
+        /*
+        Original board save
+        taaki fixed cells edit na ho
+        */
+        int original[9][9];
 
+        for (int i = 0; i < 9; i++)
+        {
+
+            for (int j = 0; j < 9; j++)
+            {
+
+                original[i][j] = board[i][j];
+            }
+        }
+
+        cout << "\n=========== SUDOKU ===========\n";
+
+        while (true)
+        {
+
+            printSudoku(board);
+
+            /*
+            Win Check
+            */
+            if (sudokuComplete(board))
+            {
+
+                cout << "\n🎉 Sudoku Completed!\n";
+                return;
+            }
+
+            cout << "\nEnter Row (1-9)";
+            cout << " OR -1 to Quit: ";
+
+            int row = getIntegerInput();
+
+            /*
+            Quit to main menu
+            */
+            if (row == -1)
+            {
+
+                cout << "\nReturning to Main Menu...\n";
+                return;
+            }
+
+            cout << "Enter Column (1-9): ";
+            int col = getIntegerInput();
+
+            cout << "Enter Number (1-9): ";
+            int num = getIntegerInput();
+
+            /*
+            Range Validation
+            */
+            if (row < 1 || row > 9 ||
+                col < 1 || col > 9 ||
+                num < 1 || num > 9)
+            {
+
+                cout << "\nInvalid Input.\n";
+                continue;
+            }
+
+            row--;
+            col--;
+
+
+            /*
+            Fixed Cell Check
+            */
+            if (original[row][col] != 0)
+            {
+
+                cout << "\nCannot edit fixed cells.\n";
+                continue;
+            }
+
+            /*
+            Temporarily clear current cell
+            */
+            board[row][col] = 0;
+
+            /*
+            Sudoku rule validation
+            */
+           board[row][col] = 0;
+            if (isValidSudokuMove(
+                    board,
+                    row,
+                    col,
+                    num))
+            {
+
+                board[row][col] = num;
+
+                cout << "\n✅ Number Added.\n";
+            }
+            else
+            {
+
+                cout << "\n❌ Invalid Sudoku Move.\n";
+            }
+        }
+    }
     /*
     =======================================================
                     TIC TAC TOE
     =======================================================
-
-    3x3 board game
-
-    Players:
-    X
-    O
     */
-    void ticTacToe() {
+    void ticTacToe()
+    {
 
-        /*
-        Board initialize
-
-        Initially numbers store kar rahe hain
-        taaki player easily choose kare.
-        */
         char board[3][3] = {
 
-            {'1','2','3'},
-            {'4','5','6'},
-            {'7','8','9'}
-        };
+            {'1', '2', '3'},
+            {'4', '5', '6'},
+            {'7', '8', '9'}};
 
         char currentPlayer = 'X';
 
         int turns = 0;
 
-        while(turns < 9) {
+        while (turns < 9)
+        {
 
             cout << "\n======= TIC TAC TOE =======\n\n";
 
-            /*
-            Board print
-            */
-            for(int i = 0; i < 3; i++) {
-
-                for(int j = 0; j < 3; j++) {
-
-                    cout << board[i][j] << " ";
-                }
-
-                cout << endl;
-            }
-
-            int move;
+            printBoard(board);
 
             cout << "\nPlayer "
                  << currentPlayer
-                 << " choose position: ";
+                 << " choose position (1-9): ";
 
-            cin >> move;
+            int move = getIntegerInput();
 
-            /*
-            Invalid move range check
-            */
-            if(move < 1 || move > 9) {
+            if (move < 1 || move > 9)
+            {
 
-                cout << "\nMove should be between 1-9\n";
+                cout << "\nInvalid position.\n";
                 continue;
             }
 
-            /*
-            Position ko row/column me convert
-            */
             int row = (move - 1) / 3;
             int col = (move - 1) % 3;
 
             /*
-            Check if already occupied
+            Already occupied?
             */
-            if(board[row][col] == 'X' ||
-               board[row][col] == 'O') {
+            if (board[row][col] == 'X' ||
+                board[row][col] == 'O')
+            {
 
                 cout << "\nPosition already occupied.\n";
                 continue;
             }
 
-            /*
-            Move place karna
-            */
             board[row][col] = currentPlayer;
 
-            /*
-            WIN CHECK
-            */
-            if(checkWinner(board, currentPlayer)) {
+            if (checkWinner(board, currentPlayer))
+            {
 
                 cout << "\n";
-
-                for(int i = 0; i < 3; i++) {
-
-                    for(int j = 0; j < 3; j++) {
-
-                        cout << board[i][j] << " ";
-                    }
-
-                    cout << endl;
-                }
+                printBoard(board);
 
                 cout << "\nPlayer "
                      << currentPlayer
@@ -316,12 +530,10 @@ public:
             }
 
             /*
-            Player switch
+            Switch Player
             */
-            if(currentPlayer == 'X')
-                currentPlayer = 'O';
-            else
-                currentPlayer = 'X';
+            currentPlayer =
+                (currentPlayer == 'X') ? 'O' : 'X';
 
             turns++;
         }
@@ -331,42 +543,67 @@ public:
 
     /*
     =======================================================
-                    CHECK WINNER
+                        PRINT BOARD
     =======================================================
-
-    TicTacToe me winner detect karta hai.
     */
-    bool checkWinner(char board[3][3], char player) {
+    void printBoard(char board[3][3])
+    {
+
+        for (int i = 0; i < 3; i++)
+        {
+
+            for (int j = 0; j < 3; j++)
+            {
+
+                cout << board[i][j];
+
+                if (j != 2)
+                    cout << " | ";
+            }
+
+            cout << endl;
+
+            if (i != 2)
+                cout << "--+---+--\n";
+        }
+    }
+
+    /*
+    =======================================================
+                        CHECK WINNER
+    =======================================================
+    */
+    bool checkWinner(char board[3][3], char player)
+    {
 
         /*
-        Rows and Columns check
+        Rows + Columns
         */
-        for(int i = 0; i < 3; i++) {
+        for (int i = 0; i < 3; i++)
+        {
 
-            // Row check
-            if(board[i][0] == player &&
-               board[i][1] == player &&
-               board[i][2] == player)
+            if (board[i][0] == player &&
+                board[i][1] == player &&
+                board[i][2] == player)
                 return true;
 
-            // Column check
-            if(board[0][i] == player &&
-               board[1][i] == player &&
-               board[2][i] == player)
+            if (board[0][i] == player &&
+                board[1][i] == player &&
+                board[2][i] == player)
                 return true;
         }
 
         /*
-        Diagonal checks
+        Diagonals
         */
-        if(board[0][0] == player &&
-           board[1][1] == player &&
-           board[2][2] == player)
+        if (board[0][0] == player &&
+            board[1][1] == player &&
+            board[2][2] == player)
             return true;
 
-        if(board[0][2] == player &&
-           board[1][1] == player &&
-           board[2][0] == player)
+        if (board[0][2] == player &&
+            board[1][1] == player &&
+            board[2][0] == player)
             return true;
 
         return false;
@@ -377,11 +614,13 @@ public:
                         HANGMAN
     =======================================================
     */
-    void hangman() {
+    void hangman()
+    {
 
         ifstream file("assets/words.txt");
 
-        if(!file) {
+        if (!file)
+        {
 
             cout << "\nWords file not found.\n";
             return;
@@ -391,29 +630,39 @@ public:
 
         string word;
 
-        while(file >> word)
+        while (file >> word)
+        {
+
             words.push_back(word);
+        }
 
-        /*
-        Random word choose
-        */
-        string secret = words[rand() % words.size()];
+        if (words.empty())
+        {
 
-        /*
-        Example:
+            cout << "\nNo words found.\n";
+            return;
+        }
 
-        secret = apple
+        string secret =
+            words[rand() % words.size()];
 
-        guessed = _____
-        */
+        transform(
+            secret.begin(),
+            secret.end(),
+            secret.begin(),
+            ::tolower);
+
         string guessed(secret.length(), '_');
-
-        int attempts = 6;
 
         vector<char> usedLetters;
 
-        while(attempts > 0 &&
-              guessed != secret) {
+        int attempts = 6;
+
+        while (attempts > 0 &&
+               guessed != secret)
+        {
+
+            cout << "\n======= HANGMAN =======\n";
 
             cout << "\nWord: " << guessed << endl;
 
@@ -421,26 +670,26 @@ public:
                  << attempts
                  << endl;
 
-            char guess;
+            cout << "Used Letters: ";
 
-            cout << "Enter Letter: ";
+            for (char c : usedLetters)
+                cout << c << " ";
+
+            cout << "\n\nEnter Letter: ";
+
+            char guess;
             cin >> guess;
 
+            guess = tolower(guess);
+
             /*
-            Check repeated guess
+            Repeated check
             */
-            bool alreadyUsed = false;
-
-            for(char c : usedLetters) {
-
-                if(c == guess) {
-
-                    alreadyUsed = true;
-                    break;
-                }
-            }
-
-            if(alreadyUsed) {
+            if (find(
+                    usedLetters.begin(),
+                    usedLetters.end(),
+                    guess) != usedLetters.end())
+            {
 
                 cout << "\nAlready guessed.\n";
                 continue;
@@ -450,19 +699,24 @@ public:
 
             bool found = false;
 
-            /*
-            Letter search
-            */
-            for(int i = 0; i < secret.length(); i++) {
+            for (int i = 0; i < secret.length(); i++)
+            {
 
-                if(secret[i] == guess) {
+                if (secret[i] == guess)
+                {
 
                     guessed[i] = guess;
                     found = true;
                 }
             }
 
-            if(!found) {
+            if (found)
+            {
+
+                cout << "\nCorrect Guess!\n";
+            }
+            else
+            {
 
                 attempts--;
 
@@ -470,10 +724,16 @@ public:
             }
         }
 
-        if(guessed == secret)
-            cout << "\nYou Won!\n";
+        if (guessed == secret)
+        {
+
+            cout << "\n🎉 YOU WON!\n";
+        }
         else
-            cout << "\nYou Lost!\n";
+        {
+
+            cout << "\n💀 YOU LOST!\n";
+        }
 
         cout << "Correct Word: "
              << secret
@@ -484,20 +744,14 @@ public:
     =======================================================
                         MATH QUIZ
     =======================================================
-
-    FILE FORMAT:
-
-    5 + 7
-    12
-
-    9 * 6
-    54
     */
-    void mathQuiz() {
+    void mathQuiz()
+    {
 
         ifstream file("assets/math_questions.txt");
 
-        if(!file) {
+        if (!file)
+        {
 
             cout << "\nMath file not found.\n";
             return;
@@ -508,39 +762,66 @@ public:
 
         int score = 0;
 
+        int totalQuestions = 0;
+
         cout << "\n========== MATH QUIZ ==========\n";
 
-        /*
-        Ek question
-        + ek answer
-        */
-        while(getline(file, question)) {
+        cout << "Enter 1 anytime to quit.\n";
 
-            if(question.empty())
+        while (getline(file, question))
+        {
+
+            if (question.empty())
                 continue;
 
-            getline(file, answerLine);
+            if (!getline(file, answerLine))
+                break;
 
-            int correctAnswer = stoi(answerLine);
+            int correctAnswer;
 
-            int userAnswer;
+            try
+            {
+
+                correctAnswer = stoi(answerLine);
+            }
+            catch (...)
+            {
+
+                continue;
+            }
 
             cout << "\nQuestion: "
                  << question
                  << endl;
 
             cout << "Answer: ";
-            cin >> userAnswer;
 
-            if(userAnswer == correctAnswer) {
+            int userAnswer =
+                getIntegerInput();
 
-                cout << "Correct!\n";
+            /*
+            Quit Condition
+            */
+            if (userAnswer == 1)
+            {
+
+                cout << "\nReturning to Main Menu...\n";
+                return;
+            }
+
+            totalQuestions++;
+
+            if (userAnswer == correctAnswer)
+            {
+
+                cout << "✅ Correct!\n";
 
                 score++;
             }
-            else {
+            else
+            {
 
-                cout << "Wrong!\n";
+                cout << "❌ Wrong!\n";
 
                 cout << "Correct Answer: "
                      << correctAnswer
@@ -548,8 +829,12 @@ public:
             }
         }
 
-        cout << "\nFinal Score: "
+        cout << "\n=========== RESULT ===========\n";
+
+        cout << "Score: "
              << score
+             << "/"
+             << totalQuestions
              << endl;
     }
 
@@ -558,11 +843,9 @@ public:
                     NUMBER GUESSING
     =======================================================
     */
-    void numberGuess() {
+    void numberGuess()
+    {
 
-        /*
-        Random secret number
-        */
         int secret = rand() % 100 + 1;
 
         int guess;
@@ -573,29 +856,36 @@ public:
 
         cout << "Guess Number Between 1-100\n";
 
-        do {
+        do
+        {
 
             cout << "\nEnter Guess: ";
-            cin >> guess;
+
+            guess = getIntegerInput();
 
             attempts++;
 
-            if(guess > secret)
+            if (guess > secret)
+            {
+
                 cout << "Too High!\n";
+            }
+            else if (guess < secret)
+            {
 
-            else if(guess < secret)
                 cout << "Too Low!\n";
+            }
+            else
+            {
 
-            else {
+                cout << "\n🎯 Correct Guess!\n";
 
-                cout << "\nCorrect Guess!\n";
-
-                cout << "Total Attempts: "
+                cout << "Attempts: "
                      << attempts
                      << endl;
             }
 
-        } while(guess != secret);
+        } while (guess != secret);
     }
 };
 
@@ -603,10 +893,10 @@ public:
 ===========================================================
                         MAIN FUNCTION
 ===========================================================
-
-Program execution yahin se start hota hai.
 */
-int main() {
+
+int main()
+{
 
     LogicQuest game;
 
